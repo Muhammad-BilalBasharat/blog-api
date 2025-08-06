@@ -1,5 +1,6 @@
 import Post from "../models/post.js"
 import cloudinary from "../utils/cloudinary.js"
+import slugify from "slugify"
 
 
 const getPosts = async (req, res) => {
@@ -44,6 +45,29 @@ const getPostById = async (req, res) => {
   }
 }
 
+const getPostBySlug = async (req, res) => {
+  try {
+    const post = await Post.findOne({ slug: req.params.slug });
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Post fetched successfully by slug",
+      post,
+    });
+  } catch (error) {
+    console.error("Error fetching post by slug:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 
 const createPost = async (req, res) => {
   try {
@@ -55,6 +79,9 @@ const createPost = async (req, res) => {
         message: "Title, content, and author are required fields.",
       })
     }
+
+     const slug = slugify(title, { lower: true, strict: true });
+
 
     let imageUrl = ""
     let cloudinaryId = ""
@@ -70,6 +97,7 @@ const createPost = async (req, res) => {
 
     const newPost = await Post.create({
       title,
+      slug,
       content,
       author,
       tags: tags ? tags.split(",").map((tag) => tag.trim()) : [], // Assuming tags come as a comma-separated string
@@ -107,6 +135,11 @@ const updatePost = async (req, res) => {
 
     let imageUrl = post.imageUrl
     let cloudinaryId = post.cloudinaryId
+      let updatedSlug = post.slug;
+
+    if (title && title !== post.title) {
+      updatedSlug = slugify(title, { lower: true, strict: true });
+    }
 
     if (req.file) {
       // If a new image is uploaded, delete the old one from Cloudinary
@@ -129,14 +162,15 @@ const updatePost = async (req, res) => {
       postId,
       {
         title,
+        slug: updatedSlug,
         content,
         author,
-        tags: tags ? tags.split(",").map((tag) => tag.trim()) : post.tags, // Update tags or keep existing
+        tags: tags ? tags.split(",").map((tag) => tag.trim()) : post.tags, 
         imageUrl,
         cloudinaryId,
         updatedAt: Date.now(),
       },
-      { new: true, runValidators: true }, // Return the updated document and run schema validators
+      { new: true, runValidators: true }, 
     )
 
     res.status(200).json({
@@ -187,4 +221,4 @@ const deletePost = async (req, res) => {
   }
 }
 
-export { getPosts, getPostById, createPost, updatePost, deletePost }
+export { getPosts, getPostById, createPost, updatePost, deletePost ,getPostBySlug}
