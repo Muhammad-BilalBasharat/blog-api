@@ -24,11 +24,11 @@ const postSchema = new mongoose.Schema({
     trim: true,
   },
   imageUrl: {
-    type: String, // URL of the image from Cloudinary
+    type: String, 
     default: "",
   },
   cloudinaryId: {
-    type: String, // Public ID from Cloudinary for deletion
+    type: String, 
     default: "",
   },
   tags: [
