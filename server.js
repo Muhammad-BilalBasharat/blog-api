@@ -8,6 +8,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import usersRoutes from "./routes/users.js"
 import postsRoutes from "./routes/posts.js"
+import { PORT } from "./config/envConfig.js";
 // import commentsRoutes from "./routes/comments.js"
 
 
@@ -18,7 +19,7 @@ app.use(helmet())
 app.use(cookieParser())
 app.use(cors({ origin: "http://localhost:3000", credentials: true }))
 
-const port = process.env.PORT || 5000
+const port = PORT || 5000
 
 
 // api routes
