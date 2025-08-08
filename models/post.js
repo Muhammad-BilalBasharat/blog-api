@@ -8,13 +8,13 @@ const postSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 200,
   },
-  slug: { 
+  slug: {
     type: String,
     unique: true,
     lowercase: true,
     index: true,
   },
-  content: {
+  description: {
     type: String,
     required: true,
   },
@@ -23,22 +23,34 @@ const postSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  imageUrl: {
-    type: String, 
-    default: "",
+  // Updated to support both single image and multiple images
+  mainImage: {
+    url: {
+      type: String,
+      default: "",
+    },
+    fileId: {
+      type: String,
+      default: "",
+    }
   },
-  cloudinaryId: {
-    type: String, 
-    default: "",
-  },
+  otherImages: [{
+    url: {
+      type: String,
+      required: true,
+    },
+    fileId: {
+      type: String,
+      required: true,
+    }
+  }],
   tags: [
     {
       type: String,
       trim: true,
     },
   ],
-},{timestamps: true});
+}, { timestamps: true });
 
 const Post = mongoose.model("Post", postSchema);
-
 export default Post;

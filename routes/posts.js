@@ -1,18 +1,42 @@
-import express from "express"
-import { getPosts, getPostById, createPost, updatePost, deletePost ,getPostBySlug} from "../controllers/posts.js"
+import express from "express";
+import { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug } from "../controllers/posts.js";
 import upload from "../middlewares/uploadImage.js";
 import verifyAdmin from "../middlewares/verifyAdmin.js";
 import verifyToken from "../middlewares/verifyToken.js";
 import commentsRoutes from "./comments.js";
-const router = express.Router( );
+
+const router = express.Router();
+
 router.use("/:postId/comments", commentsRoutes);
 
+router.get("/posts", verifyToken, verifyAdmin, getPosts);
+router.get("/post/:id", verifyToken, getPostById);
+router.get("/post-by-slug/:slug", verifyToken, getPostBySlug);
 
-router.get("/posts",verifyToken,verifyAdmin, getPosts)
-router.get("/post/:id", verifyToken, getPostById)
-router.get("/post-by-slug/:slug",verifyToken, getPostBySlug)
-router.post("/create-post", upload.single("image"), verifyToken,verifyAdmin,createPost) 
-router.put("/update-post/:id", upload.single("image"),verifyToken,verifyAdmin, updatePost) 
-router.delete("/delete-post/:id",verifyToken,verifyAdmin, deletePost)
+// Create post with multiple image fields
+router.post(
+  "/create-post",
+  upload.fields([
+    { name: "mainImage", maxCount: 1 },
+    { name: "otherImages", maxCount: 5 },
+  ]),
+  verifyToken,
+  verifyAdmin,
+  createPost
+);
+
+// Update post with multiple image fields
+router.put(
+  "/update-post/:id",
+  upload.fields([
+    { name: "mainImage", maxCount: 1 },
+    { name: "otherImages", maxCount: 5 },
+  ]),
+  verifyToken,
+  verifyAdmin,
+  updatePost
+);
+
+router.delete("/delete-post/:id", verifyToken, verifyAdmin, deletePost);
 
 export default router;
