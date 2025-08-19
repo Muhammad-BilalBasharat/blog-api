@@ -72,12 +72,12 @@ const getPostBySlug = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { title, description, author, tags } = req.body;
+    const { title, content, author, tags, category, isPublished, excerpt } = req.body;
     
-    if (!title || !description || !author) {
+    if (!title || !content || !author) {
       return res.status(400).json({
         success: false,
-        message: "Title, description, and author are required fields.",
+        message: "Title, content, and author are required fields.",
       });
     }
 
@@ -125,12 +125,15 @@ const createPost = async (req, res) => {
     const newPost = await Post.create({
       title,
       slug,
-      description,
+      content,
       author,
       tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
       mainImage: mainImageData,
       otherImages: otherImagesData,
-    });
+      category,
+      isPublished,
+      excerpt,
+      });
 
     res.status(201).json({
       success: true,
@@ -168,7 +171,7 @@ const createPost = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
-    const { title, description, author, tags, removeMainImage, removeOtherImageIds } = req.body;
+    const { title, content, author, tags, removeMainImage, removeOtherImageIds } = req.body;
     const postId = req.params.id;
     
     const post = await Post.findById(postId);
@@ -267,7 +270,7 @@ const updatePost = async (req, res) => {
       {
         title,
         slug: updatedSlug,
-        description,
+        content,
         author,
         tags: tags ? tags.split(",").map((tag) => tag.trim()) : post.tags,
         mainImage: currentMainImage,
@@ -362,3 +365,4 @@ const deletePost = async (req, res) => {
 };
 
 export { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug };
+                                                                                                                                                                                                                                                                                                                                               

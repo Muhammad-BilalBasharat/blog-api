@@ -11,4 +11,7 @@ router.post("/", verifyToken, createComment)
 router.put("/:commentId", verifyToken, updateComment)
 router.delete("/:commentId", verifyToken, deleteComment)
 
-export default router
+
+export default router;
+
+

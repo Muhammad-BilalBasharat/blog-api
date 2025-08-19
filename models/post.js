@@ -8,13 +8,31 @@ const postSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 200,
   },
+  category: {
+    type: String,
+    required: true,
+    trim: true,
+    enum: ["technology", "business", "education", "design","life-style","other"],
+    default: "",
+  },
+  excerpt: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 10,
+    maxlength: 500,
+  },
+  isPublished: {
+    type: Boolean,
+    default: true,
+  },
   slug: {
     type: String,
     unique: true,
     lowercase: true,
     index: true,
   },
-  description: {
+  content: {
     type: String,
     required: true,
   },
