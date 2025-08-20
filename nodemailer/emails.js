@@ -39,7 +39,7 @@ export const welcomeEmail = async (email, name) => {
 };
 
 export const sendPasswordResetEmail = async (email, resetURL) => {
-  const html = PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", resetURL);
+  const html = PASSWORD_RESET_REQUEST_TEMPLATE.replace(/{resetURL}/g, resetURL);
   try {
     const response = await transporter.sendMail({
       from: fromEmail,

@@ -26,11 +26,11 @@ app.use(helmet())
 app.use(cookieParser())
 app.use(cors({ origin: "http://localhost:3000", credentials: true }))
 
-const port = PORT || 5000
+const port = PORT || 4000
 
 
 // api routes
-app.use("/api/auth", limiter, usersRoutes)
+app.use("/api/auth", usersRoutes)
 app.use("/api/posts", postsRoutes)
 // app.use("/api/comments", commentsRoutes)
 

@@ -8,12 +8,11 @@ import commentsRoutes from "./comments.js";
 const router = express.Router();
 
 router.use("/:postId/comments", commentsRoutes);
+      
 
-router.get("/posts", verifyToken, verifyAdmin, getPosts);
+router.get("/posts", verifyToken, getPosts);
 router.get("/post/:id", verifyToken, getPostById);
 router.get("/post-by-slug/:slug", verifyToken, getPostBySlug);
-
-// Create post with multiple image fields
 router.post(
   "/create-post",
   upload.fields([
@@ -24,8 +23,6 @@ router.post(
   verifyAdmin,
   createPost
 );
-
-// Update post with multiple image fields
 router.put(
   "/update-post/:id",
   upload.fields([
@@ -36,7 +33,6 @@ router.put(
   verifyAdmin,
   updatePost
 );
-
 router.delete("/delete-post/:id", verifyToken, verifyAdmin, deletePost);
-
 export default router;
+ 

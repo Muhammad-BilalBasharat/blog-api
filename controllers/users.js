@@ -163,12 +163,22 @@ const forgotPassword = async (req, res) => {
         message: "user not found",
       })
     }
+    
     const resetToken = crypto.randomBytes(32).toString("hex")
-    const resetTokenExpires = Date.now() + 3600000
+    const resetTokenExpires = Date.now() + 3600000 // 1 hour
+    
     user.resetPasswordToken = resetToken
     user.resetPasswordExpires = resetTokenExpires
     await user.save()
-    await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`)
+    
+    // Debug: Log the reset URL
+    const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`
+    console.log("Reset URL:", resetURL)
+    console.log("Reset Token:", resetToken)
+    console.log("CLIENT_URL:", process.env.CLIENT_URL)
+    
+    await sendPasswordResetEmail(user.email, resetURL)
+    
     res.status(200).json({
       success: true,
       message: "password reset email sent successfully",
@@ -185,23 +195,33 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   const { newPassword } = req.body
   const { token } = req.params
+  
   try {
+    // Debug: Log the incoming token
+    console.log("Received token:", token)
+    console.log("Token length:", token.length)
+    
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() },
     })
+    
     if (!user) {
+      console.log("No user found with token:", token)
       return res.status(400).json({
         success: false,
         message: "Invalid or expired reset token",
       })
     }
+    
     const hashedPassword = await bcrypt.hash(newPassword, 10)
     user.password = hashedPassword
     user.resetPasswordToken = undefined
     user.resetPasswordExpires = undefined
     await user.save()
+    
     await sendResetSuccessEmail(user.email)
+    
     res.status(200).json({
       success: true,
       message: "Password reset successful",
