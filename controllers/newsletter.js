@@ -44,9 +44,32 @@ const getAllSubscribers = async (req, res) => {
   }
 };
 
+// only admin can delete subscriber
+const deleteSubscriber = async (req, res) => {
+  try {
+    const { id } = req.params;  
+    const subscriber = await Newsletter.findByIdAndDelete(id);
+    if (!subscriber) {
+      return res.status(404).json({
+        success: false,
+        message: "Subscriber not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Subscriber deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 
 export {
   subscribe,
   getAllSubscribers,
-
+  deleteSubscriber,
 };

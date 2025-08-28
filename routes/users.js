@@ -28,8 +28,8 @@ router.post("/reset-password/:token", resetPassword)
 router.post("/refresh-token", refreshAccessToken)
 router.get("/users", verifyToken, verifyAdmin, getUser)
 router.get("/me", verifyToken, getUserById)
-router.put("/change-password", verifyToken, changePassword)
-router.delete("/delete-user", verifyToken, verifyAdmin, deleteUser)
+router.put("/change-password", verifyToken, verifyAdmin, changePassword)
+router.delete("/delete-user/:id", verifyToken, verifyAdmin, deleteUser)
 
 
 export default router;
