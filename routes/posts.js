@@ -1,5 +1,5 @@
 import express from "express";
-import { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug } from "../controllers/posts.js";
+import { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug, generatePostWithGemini } from "../controllers/posts.js";
 import upload from "../middlewares/uploadImage.js";
 import verifyAdmin from "../middlewares/verifyAdmin.js";
 import verifyToken from "../middlewares/verifyToken.js";
@@ -10,7 +10,7 @@ const router = express.Router();
 router.use("/:postId/comments", commentsRoutes);
       
 
-router.get("/posts", verifyToken, getPosts);
+router.get("/posts", getPosts);
 router.get("/post/:id", verifyToken, getPostById);
 router.get("/post-by-slug/:slug", verifyToken, getPostBySlug);
 router.post(
@@ -34,5 +34,6 @@ router.put(
   updatePost
 );
 router.delete("/delete-post/:id", verifyToken, verifyAdmin, deletePost);
+router.post("/generate-post", verifyToken, verifyAdmin, generatePostWithGemini);
 export default router;
  

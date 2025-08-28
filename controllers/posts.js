@@ -3,6 +3,7 @@ import imagekit from "../utils/imagekit.js";
 import { uploadAndOptimizeImageToImageKit } from "../utils/imageUpload.js";
 import slugify from "slugify";
 import fs from "fs";
+import generateText from "../utils/gemini.js";
 
 const getPosts = async (req, res) => {
   try {
@@ -73,7 +74,7 @@ const getPostBySlug = async (req, res) => {
 const createPost = async (req, res) => {
   try {
     const { title, content, author, tags, category, isPublished, excerpt } = req.body;
-    
+
     if (!title || !content || !author) {
       return res.status(400).json({
         success: false,
@@ -82,15 +83,15 @@ const createPost = async (req, res) => {
     }
 
     const slug = slugify(title, { lower: true, strict: true });
-    
+
     let mainImageData = { url: "", fileId: "" };
     let otherImagesData = [];
 
     // Handle main image upload
     if (req.files && req.files.mainImage && req.files.mainImage[0]) {
       mainImageData = await uploadAndOptimizeImageToImageKit(
-        req.files.mainImage[0], 
-        "/blog-posts/main", 
+        req.files.mainImage[0],
+        "/blog-posts/main",
         ["blog-post", "main-image"]
       );
     }
@@ -101,8 +102,8 @@ const createPost = async (req, res) => {
         if (otherImagesData.length < 5) {
           try {
             const uploaded = await uploadAndOptimizeImageToImageKit(
-              imageFile, 
-              "/blog-posts/others", 
+              imageFile,
+              "/blog-posts/others",
               ["other-image", "blog-post"]
             );
             otherImagesData.push(uploaded);
@@ -133,7 +134,7 @@ const createPost = async (req, res) => {
       category,
       isPublished,
       excerpt,
-      });
+    });
 
     res.status(201).json({
       success: true,
@@ -142,7 +143,7 @@ const createPost = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating post:", error);
-    
+
     // Clean up uploaded files if they exist
     if (req.files) {
       if (req.files.mainImage) {
@@ -160,7 +161,7 @@ const createPost = async (req, res) => {
         });
       }
     }
-    
+
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -173,7 +174,7 @@ const updatePost = async (req, res) => {
   try {
     const { title, content, author, tags, removeMainImage, removeOtherImageIds } = req.body;
     const postId = req.params.id;
-    
+
     const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({
@@ -203,8 +204,8 @@ const updatePost = async (req, res) => {
 
       const imageFile = req.files.mainImage[0];
       currentMainImage = await uploadAndOptimizeImageToImageKit(
-        imageFile, 
-        "/blog-posts/main", 
+        imageFile,
+        "/blog-posts/main",
         ["main-image", "blog-post"]
       );
     } else if (removeMainImage === "true" && currentMainImage && currentMainImage.fileId) {
@@ -219,10 +220,10 @@ const updatePost = async (req, res) => {
 
     // Handle otherImages removal
     if (removeOtherImageIds) {
-      const idsToRemove = Array.isArray(removeOtherImageIds) 
-        ? removeOtherImageIds 
+      const idsToRemove = Array.isArray(removeOtherImageIds)
+        ? removeOtherImageIds
         : removeOtherImageIds.split(",").map(id => id.trim());
-      
+
       const imagesToKeep = [];
       for (const img of currentOtherImages) {
         if (idsToRemove.includes(img.fileId)) {
@@ -244,8 +245,8 @@ const updatePost = async (req, res) => {
         if (currentOtherImages.length < 5) {
           try {
             const uploaded = await uploadAndOptimizeImageToImageKit(
-              imageFile, 
-              "/blog-posts/others", 
+              imageFile,
+              "/blog-posts/others",
               ["other-image", "blog-post"]
             );
             currentOtherImages.push(uploaded);
@@ -287,7 +288,7 @@ const updatePost = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating post:", error);
-    
+
     // Clean up any uploaded files if there's an error
     if (req.files) {
       if (req.files.mainImage) {
@@ -305,7 +306,7 @@ const updatePost = async (req, res) => {
         });
       }
     }
-    
+
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -318,7 +319,7 @@ const deletePost = async (req, res) => {
   try {
     const postId = req.params.id;
     const post = await Post.findById(postId);
-    
+
     if (!post) {
       return res.status(404).json({
         success: false,
@@ -349,7 +350,7 @@ const deletePost = async (req, res) => {
     }
 
     await Post.findByIdAndDelete(postId);
-    
+
     res.status(200).json({
       success: true,
       message: "Post deleted successfully",
@@ -364,5 +365,40 @@ const deletePost = async (req, res) => {
   }
 };
 
-export { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug };
-                                                                                                                                                                                                                                                                                                                                               
+const generatePostWithGemini = async (req, res) => {
+  try {
+    const { title, category, tags, excerpt } = req.body;
+    const prompt = `
+Write a fully original, plagiarism-free, and SEO-optimized blog post in markdown format.  
+Topic: ${title}  
+Category: ${category}  
+Tags: ${tags}  
+Excerpt: ${excerpt}  
+Requirements:  
+- Length: 1200–1500 words. 
+- Write in a natural, conversational, and human-like tone with varied sentence structures.  
+- Use storytelling, relatable examples, and practical insights.  
+- Structure content with a clear title, H2/H3 subheadings, bullet points, and short paragraphs.  
+- Add a strong hook in the introduction and a conclusion with a clear call-to-action.  
+- Naturally integrate relevant keywords without keyword stuffing.  
+- Make it engaging, easy to read, and valuable for the target audience.  
+- Avoid AI-sounding or generic filler content.  
+- Return **only** the final markdown content.  
+`;
+    const post = await generateText(prompt);
+    res.status(200).json({
+      success: true,
+      message: "Post generated successfully",
+      post,
+    });
+  } catch (error) {
+    console.error("Error generating post:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+}
+
+export { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug, generatePostWithGemini };

@@ -384,6 +384,7 @@ const refreshAccessToken = async (req, res) => {
   }
 }
 
+
 export {
   signup,
   verifyEmail,
@@ -395,5 +396,5 @@ export {
   getUserById,
   changePassword,
   deleteUser,
-  refreshAccessToken,
-}
+  refreshAccessToken,  
+  }

@@ -13,7 +13,6 @@ import {
   deleteUser,
   refreshAccessToken,
 } from "../controllers/users.js"
-import limiter from "../middlewares/rateLimt.js"
 import verifyToken from "../middlewares/verifyToken.js"
 import verifyAdmin from "../middlewares/verifyAdmin.js"
 
@@ -31,5 +30,6 @@ router.get("/users", verifyToken, verifyAdmin, getUser)
 router.get("/me", verifyToken, getUserById)
 router.put("/change-password", verifyToken, changePassword)
 router.delete("/delete-user", verifyToken, verifyAdmin, deleteUser)
+
 
 export default router;
