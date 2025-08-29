@@ -168,6 +168,32 @@ const deleteComment = async (req, res) => {
   }
 }
 
-export { getCommentsForPost, createComment, updateComment, deleteComment }
+const getAllComments = async (req, res) => {
+  try {
+    // Populate both userId and postId to get user and post details
+    const comments = await Comment.find({})
+      .populate("userId", "name email role") // Get user details including role
+      .populate("postId", "title slug") // Get post details (optional)
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .exec();
+
+    res.status(200).json({
+      success: true,
+      message: "All comments fetched successfully",
+      comments,
+      total: comments.length
+    });
+  } catch (error) {
+    console.error("Error fetching all comments:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
+export { getCommentsForPost, createComment, updateComment, deleteComment, getAllComments }
 
 

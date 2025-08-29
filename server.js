@@ -10,7 +10,7 @@ import usersRoutes from "./routes/users.js"
 import postsRoutes from "./routes/posts.js"
 import { PORT } from "./config/envConfig.js";
 import newsletterRoutes from "./routes/newsletter.js"
-// import commentsRoutes from "./routes/comments.js"
+import commentsRoutes from "./routes/comments.js"
 
 
 
@@ -29,7 +29,7 @@ const port = PORT || 4000
 app.use("/api/auth", usersRoutes)
 app.use("/api/posts", postsRoutes)
 app.use("/api/newsletter", newsletterRoutes)
-// app.use("/api/comments", commentsRoutes)
+app.use("/api/comments", commentsRoutes)
 
 
 app.listen(port, () => {

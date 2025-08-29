@@ -1,5 +1,5 @@
 import express from "express";
-import { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug, generatePostWithGemini } from "../controllers/posts.js";
+import { getPosts, getPostById, createPost, updatePost, deletePost, getPostBySlug, generatePostWithGemini, } from "../controllers/posts.js";
 import upload from "../middlewares/uploadImage.js";
 import verifyAdmin from "../middlewares/verifyAdmin.js";
 import verifyToken from "../middlewares/verifyToken.js";
